@@ -643,15 +643,22 @@ impl Interpolator {
     /// underlying writer doesn't support hyperlinks or if the hyperlink
     /// format is empty. The status should be provided to `Interpolator::end`
     /// as an instruction for whether to close the hyperlink or not.
+    /// Returns true if and only if `begin` would write a hyperlink to `wtr`.
+    ///
+    /// Callers check this before computing a hyperlink path, which may touch
+    /// the file system.
+    pub(crate) fn is_active<W: WriteColor>(&self, wtr: &W) -> bool {
+        !self.config.format().is_empty()
+            && wtr.supports_hyperlinks()
+            && wtr.supports_color()
+    }
+
     pub(crate) fn begin<W: WriteColor>(
         &self,
         values: &Values,
         mut wtr: W,
     ) -> io::Result<InterpolatorStatus> {
-        if self.config.format().is_empty()
-            || !wtr.supports_hyperlinks()
-            || !wtr.supports_color()
-        {
+        if !self.is_active(&wtr) {
             return Ok(InterpolatorStatus::inactive());
         }
         let mut buf = self.buf.borrow_mut();

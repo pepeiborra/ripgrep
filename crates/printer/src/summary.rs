@@ -592,6 +592,9 @@ impl<'p, 's, M: Matcher, W: WriteColor> SummarySink<'p, 's, M, W> {
     fn start_hyperlink(
         &mut self,
     ) -> io::Result<hyperlink::InterpolatorStatus> {
+        if !self.interpolator.is_active(&*self.summary.wtr.borrow()) {
+            return Ok(hyperlink::InterpolatorStatus::inactive());
+        }
         let Some(hyperpath) =
             self.path.as_ref().and_then(|p| p.as_hyperlink())
         else {

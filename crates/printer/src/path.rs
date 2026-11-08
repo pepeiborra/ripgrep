@@ -167,6 +167,9 @@ impl<W: WriteColor> PathPrinter<W> {
         &mut self,
         path: &PrinterPath,
     ) -> io::Result<hyperlink::InterpolatorStatus> {
+        if !self.interpolator.is_active(&self.wtr) {
+            return Ok(hyperlink::InterpolatorStatus::inactive());
+        }
         let Some(hyperpath) = path.as_hyperlink() else {
             return Ok(hyperlink::InterpolatorStatus::inactive());
         };
